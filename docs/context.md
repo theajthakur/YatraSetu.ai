@@ -41,10 +41,13 @@
 - `components/planner/DurationStepper.tsx`: Days counter stepper.
 - `components/planner/InterestsSelect.tsx`: Checkboxes with Lucide scanability icons (Heritage, Food, Adventure, Spiritual).
 - `components/planner/LanguageToggle.tsx`: English / Hindi toggle segment.
+- `app/api/gemini/route.ts`: Server-side POST API route handler invoking Gemini API with server timestamp/date context for place insights (summary, hospitality, crowd_suggestion).
+- `app/api/gemini/gemini.ts`: Client-side helper module with PlaceInsight interface, AbortController timeout handling, and fallback insights.
 - `components/safety/SOSButton.tsx`: Persistent safety SOS button with 1-second mock dispatch loader before displaying the calm "Alert Sent" confirmation Dialog.
 - `components/planner/PlannerForm.tsx`: Unified single-screen trip planner card with 1-second mock generation loader upon form submission.
-- `components/itinerary/DayTabs.tsx`: Day selector tabs with 500ms mock transit fetch loader during day switching.
-- `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal with QR scanning loader, language translation loader, and audio guide buffering simulation.
+- `components/itinerary/TripSummaryCard.tsx`: Top-of-page auto-loading trip summary component displaying plain-language overview, general atmosphere, and practical travel advice from a single API call on mount.
+- `components/itinerary/StopCard.tsx`: Individual stop item card displaying time slot, place name, 1-line description, crowd level indicator, and expandable AI Insight panel.
+- `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal integrating live Gemini place insights, audio guide buffering simulation, and language switcher.
 
 ---
 

@@ -10,6 +10,10 @@ import {
   Info,
   Loader2,
   QrCode,
+  Users,
+  Heart,
+  Sparkles,
+  Compass,
 } from "lucide-react";
 import {
   Dialog,
@@ -19,6 +23,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { getHeritageData } from "@/lib/mockHeritageData";
+import { fetchPlaceInsights, PlaceInsight } from "@/app/api/gemini/gemini";
 
 interface HeritageModalProps {
   placeName: string | null;
@@ -33,17 +38,23 @@ export default function HeritageModal({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const [isAudioBuffering, setIsAudioBuffering] = useState(false);
+  const [aiInsight, setAiInsight] = useState<PlaceInsight | null>(null);
 
   useEffect(() => {
     if (placeName) {
       setIsLoadingContent(true);
       setIsPlaying(false);
-      const timer = setTimeout(() => {
+
+      // Fetch AI Place Insights from /api/gemini
+      fetchPlaceInsights({
+        placeName,
+        language,
+      }).then((insight) => {
+        setAiInsight(insight);
         setIsLoadingContent(false);
-      }, 900);
-      return () => clearTimeout(timer);
+      });
     }
-  }, [placeName]);
+  }, [placeName, language]);
 
   if (!placeName) return null;
 
@@ -54,9 +65,6 @@ export default function HeritageModal({
     if (lang === language) return;
     setIsLoadingContent(true);
     setLanguage(lang);
-    setTimeout(() => {
-      setIsLoadingContent(false);
-    }, 400);
   };
 
   const handleAudioToggle = () => {
@@ -73,7 +81,7 @@ export default function HeritageModal({
 
   return (
     <Dialog open={!!placeName} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg p-6 bg-white border border-primary-200 rounded-2xl shadow-2xl space-y-5">
+      <DialogContent className="max-w-lg p-6 bg-white border border-primary-200 rounded-2xl shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
         {isLoadingContent ? (
           <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
             <div className="p-3 rounded-full bg-primary-100 text-primary-600">
@@ -81,11 +89,11 @@ export default function HeritageModal({
             </div>
             <div className="space-y-1">
               <DialogTitle className="font-display text-lg font-bold text-secondary-900">
-                Scanning QR Code & Loading Heritage Archives...
+                Scanning QR & Generating Insights...
               </DialogTitle>
               <DialogDescription className="text-xs text-secondary-600 flex items-center justify-center gap-1.5 pt-1">
                 <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
-                <span>Retrieving verified architectural history...</span>
+                <span>Consulting Gemini AI & Heritage Archives...</span>
               </DialogDescription>
             </div>
           </div>
@@ -97,7 +105,7 @@ export default function HeritageModal({
                 <div className="flex items-center gap-2 text-primary-700">
                   <Landmark className="w-5 h-5 text-primary-600" />
                   <span className="font-display font-semibold text-xs text-secondary-600">
-                    Heritage Guide & QR Scanner
+                    Heritage Guide & AI Insights
                   </span>
                 </div>
 
@@ -133,11 +141,11 @@ export default function HeritageModal({
                 {localizedContent.title}
               </DialogTitle>
               <DialogDescription className="text-xs text-secondary-500 font-medium">
-                Audio-visual cultural archives
+                Real-time intelligent heritage insights
               </DialogDescription>
             </DialogHeader>
 
-            {/* Audio Guide Controls (UI simulation) */}
+            {/* Audio Guide Controls */}
             <div className="p-4 rounded-xl border border-primary-200 bg-primary-100/30 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -179,7 +187,7 @@ export default function HeritageModal({
                 </button>
               </div>
 
-              {/* Simulated Audio Progress Bar */}
+              {/* Audio Progress Bar */}
               {isPlaying && !isAudioBuffering && (
                 <div className="space-y-1 pt-1">
                   <div className="w-full bg-primary-200 h-1.5 rounded-full overflow-hidden">
@@ -193,20 +201,50 @@ export default function HeritageModal({
               )}
             </div>
 
-            {/* Heritage Story Content */}
-            <div className="space-y-3">
-              <p className="text-xs sm:text-sm text-secondary-800 leading-relaxed">
-                {localizedContent.summary}
-              </p>
-
-              <div className="p-3 rounded-lg border border-primary-200/80 bg-white flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />
-                <div className="text-xs text-secondary-700 leading-snug">
-                  <span className="font-semibold text-secondary-900">
-                    Key Fact:{" "}
-                  </span>
-                  {localizedContent.keyFact}
+            {/* AI Insights Block */}
+            {aiInsight && (
+              <div className="space-y-3 p-4 rounded-xl border border-primary-200 bg-white shadow-xs">
+                <div className="flex items-center gap-2 text-primary-700 font-semibold text-xs border-b border-primary-100 pb-2">
+                  <Compass className="w-4 h-4 text-primary-600" />
+                  <span>Contextual AI Insights</span>
                 </div>
+
+                <div className="space-y-2 text-xs sm:text-sm text-secondary-800 leading-relaxed">
+                  <p>{aiInsight.summary}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-xs">
+                  <div className="p-2.5 rounded-lg bg-primary-100/40 border border-primary-200/60 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-secondary-900">
+                      <Heart className="w-3.5 h-3.5 text-primary-600" />
+                      <span>Hospitality & Vibe</span>
+                    </div>
+                    <div className="text-secondary-700 text-[11px] leading-snug">
+                      {aiInsight.hospitality}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-primary-100/40 border border-primary-200/60 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-secondary-900">
+                      <Users className="w-3.5 h-3.5 text-primary-600" />
+                      <span>Crowd & Timing</span>
+                    </div>
+                    <div className="text-secondary-700 text-[11px] leading-snug">
+                      {aiInsight.crowd_suggestion}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Heritage Key Fact */}
+            <div className="p-3 rounded-lg border border-primary-200/80 bg-primary-100/20 flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />
+              <div className="text-xs text-secondary-700 leading-snug">
+                <span className="font-semibold text-secondary-900">
+                  Key Heritage Fact:{" "}
+                </span>
+                {localizedContent.keyFact}
               </div>
             </div>
 

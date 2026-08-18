@@ -7,6 +7,7 @@ import { MapPin, Calendar, Languages, ArrowLeft, Compass } from "lucide-react";
 import { getItinerary } from "@/lib/mockItineraries";
 import DayTabs from "@/components/itinerary/DayTabs";
 import HeritageModal from "@/components/itinerary/HeritageModal";
+import TripSummaryCard from "@/components/itinerary/TripSummaryCard";
 
 function ItineraryContent() {
   const searchParams = useSearchParams();
@@ -71,6 +72,14 @@ function ItineraryContent() {
           </div>
         </div>
       </div>
+
+      {/* Trip-Level Auto Summary Card */}
+      <TripSummaryCard
+        destination={itinerary.destination}
+        days={daysParam}
+        interests={interestsParam}
+        language={languageParam}
+      />
 
       {/* Day-Wise Stops */}
       <DayTabs
