@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans, Geist } from "next/font/google";
+import { Poppins, Plus_Jakarta_Sans } from "next/font/google";
 import Navbar from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
+import SOSButton from "@/components/safety/SOSButton";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const playfair = Playfair_Display({
+const poppins = Poppins({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -33,12 +33,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", playfair.variable, jakarta.variable, "font-sans", geist.variable)}
+      className={cn("h-full", "antialiased", poppins.variable, jakarta.variable)}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-body">
         <Navbar />
         <div className="flex-1 flex flex-col">{children}</div>
         <Footer />
+        <SOSButton />
       </body>
     </html>
   );

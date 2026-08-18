@@ -82,7 +82,7 @@
   --color-secondary-800: var(--secondary-800);
   --color-secondary-900: var(--secondary-900);
 
-  --font-display: var(--font-display), Georgia, serif;
+  --font-display: var(--font-display), sans-serif;
   --font-body: var(--font-body), sans-serif;
 }
 

@@ -9,7 +9,7 @@
 - **Framework**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS v4 (with custom CSS variable mapping)
 - **Icons**: `lucide-react` (Strict rule: no AI-cliché icons like sparkles, stars, or magic wands)
-- **Fonts**: `Playfair Display` (Display) & `Plus Jakarta Sans` (Body) via `next/font/google`
+- **Fonts**: `Poppins` (Display / Headings) & `Plus Jakarta Sans` (Body) via `next/font/google`
 
 ---
 
@@ -29,6 +29,7 @@
 ---
 
 ## Key Components Structure
+- `components/common/Card.tsx`: Reusable card wrapper with primary border and background styles.
 - `components/common/Navbar.tsx`: Heritage-themed, minimal site header with brand logo & navigation.
 - `components/common/Footer.tsx`: Clean, compact footer with quick links and copyright info.
 - `components/landing/HeroHeadline.tsx`: Headline & subtext component.
@@ -40,7 +41,10 @@
 - `components/planner/DurationStepper.tsx`: Days counter stepper.
 - `components/planner/InterestsSelect.tsx`: Checkboxes with Lucide scanability icons (Heritage, Food, Adventure, Spiritual).
 - `components/planner/LanguageToggle.tsx`: English / Hindi toggle segment.
-- `components/planner/PlannerForm.tsx`: Unified single-screen trip planner card.
+- `components/safety/SOSButton.tsx`: Persistent safety SOS button with 1-second mock dispatch loader before displaying the calm "Alert Sent" confirmation Dialog.
+- `components/planner/PlannerForm.tsx`: Unified single-screen trip planner card with 1-second mock generation loader upon form submission.
+- `components/itinerary/DayTabs.tsx`: Day selector tabs with 500ms mock transit fetch loader during day switching.
+- `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal with QR scanning loader, language translation loader, and audio guide buffering simulation.
 
 ---
 

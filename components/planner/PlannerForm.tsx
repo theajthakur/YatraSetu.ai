@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import PlannerHeader from "./PlannerHeader";
 import DestinationInput from "./DestinationInput";
 import DurationStepper from "./DurationStepper";
@@ -10,7 +10,7 @@ import InterestsSelect, { InterestType } from "./InterestsSelect";
 import LanguageToggle, { LanguageType } from "./LanguageToggle";
 
 export default function PlannerForm() {
-  const router = Router();
+  const router = useRouter();
   const [destination, setDestination] = useState("Varanasi");
   const [days, setDays] = useState(3);
   const [interests, setInterests] = useState<InterestType[]>([
@@ -18,20 +18,21 @@ export default function PlannerForm() {
     "Spiritual",
   ]);
   const [language, setLanguage] = useState<LanguageType>("English");
-
-  function Router() {
-    return useRouter();
-  }
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = new URLSearchParams({
-      destination,
-      days: days.toString(),
-      interests: interests.join(","),
-      language,
-    });
-    router.push(`/itinerary?${query.toString()}`);
+    setIsGenerating(true);
+
+    setTimeout(() => {
+      const query = new URLSearchParams({
+        destination,
+        days: days.toString(),
+        interests: interests.join(","),
+        language,
+      });
+      router.push(`/itinerary?${query.toString()}`);
+    }, 1000);
   };
 
   return (
@@ -51,10 +52,20 @@ export default function PlannerForm() {
         <div className="pt-2">
           <button
             type="submit"
-            className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-lg bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white font-semibold text-base shadow-md transition-all duration-200 group"
+            disabled={isGenerating}
+            className="w-full inline-flex items-center justify-center gap-2 py-4 px-6 rounded-lg bg-primary-600 hover:bg-primary-700 active:bg-primary-800 disabled:opacity-80 text-white font-semibold text-base shadow-md transition-all duration-200 group cursor-pointer"
           >
-            <span>Generate Itinerary</span>
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+            {isGenerating ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Generating Personalized Itinerary...</span>
+              </>
+            ) : (
+              <>
+                <span>Generate Itinerary</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </>
+            )}
           </button>
         </div>
       </form>
