@@ -37,7 +37,8 @@
 - `components/landing/HeroIllustration.tsx`: High-resolution hero image component.
 - `components/landing/Hero.tsx`: Full-screen block-centered hero section wrapper.
 - `components/planner/PlannerHeader.tsx`: One-line header ("Tell us about your trip").
-- `components/planner/DestinationInput.tsx`: Destination text input with quick preset cities.
+- `app/api/places/route.ts`: Server-side GET API route handler proxying Google Places Autocomplete API using server-only GOOGLE_PLACE_API key. Returns typed PlaceSuggestion items ({ place_id, description, main_text, secondary_text }).
+- `components/planner/DestinationInput.tsx`: Destination text input with 350ms debounced server-side autocomplete dropdown query and preset city chips.
 - `components/planner/DurationStepper.tsx`: Days counter stepper.
 - `components/planner/InterestsSelect.tsx`: Checkboxes with Lucide scanability icons (Heritage, Food, Adventure, Spiritual).
 - `components/planner/LanguageToggle.tsx`: English / Hindi toggle segment.
@@ -45,7 +46,7 @@
 - `app/api/gemini/gemini.ts`: Client-side helper module with PlaceInsight interface, AbortController timeout handling, and fallback insights.
 - `components/safety/SOSButton.tsx`: Persistent safety SOS button with 1-second mock dispatch loader before displaying the calm "Alert Sent" confirmation Dialog.
 - `components/planner/PlannerForm.tsx`: Unified single-screen trip planner card with 1-second mock generation loader upon form submission.
-- `components/itinerary/TripSummaryCard.tsx`: Top-of-page auto-loading trip summary component displaying plain-language overview, general atmosphere, and practical travel advice from a single API call on mount.
+- `components/itinerary/TripSummaryCard.tsx`: Button-triggered trip summary component ("Get Trip Summary" CTA, zero auto-fetch on mount) rendering personalized overview, atmosphere, practical advice, and nearby recommendations.
 - `components/itinerary/StopCard.tsx`: Individual stop item card displaying time slot, place name, 1-line description, crowd level indicator, and expandable AI Insight panel.
 - `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal integrating live Gemini place insights, audio guide buffering simulation, and language switcher.
 
@@ -54,4 +55,4 @@
 ## Routes
 - `/`: Landing page + Hero section.
 - `/planner`: Single-screen Trip Planner form.
-- `/itinerary`: Itinerary results screen target.
+- `/itinerary`: Itinerary results screen (supports preset & dynamic AI itineraries).

@@ -2,9 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState, Suspense } from "react";
-import { MapPin, Calendar, Languages, ArrowLeft, Compass } from "lucide-react";
-import { getItinerary } from "@/lib/mockItineraries";
+import { useState, useEffect, Suspense } from "react";
+import { MapPin, Calendar, Languages, ArrowLeft, Compass, Loader2 } from "lucide-react";
+import { getItinerary, DestinationItinerary } from "@/lib/mockItineraries";
+import { fetchDynamicItinerary } from "@/app/api/gemini/gemini";
 import DayTabs from "@/components/itinerary/DayTabs";
 import HeritageModal from "@/components/itinerary/HeritageModal";
 import TripSummaryCard from "@/components/itinerary/TripSummaryCard";
@@ -16,8 +17,56 @@ function ItineraryContent() {
   const interestsParam = searchParams.get("interests") || "Heritage, Spiritual";
   const languageParam = searchParams.get("language") || "English";
 
-  const itinerary = getItinerary(rawDestination);
+  const presetItinerary = getItinerary(rawDestination);
+  const [itinerary, setItinerary] = useState<DestinationItinerary | null>(presetItinerary);
+  const [isLoading, setIsLoading] = useState(!presetItinerary);
   const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
+
+  useEffect(() => {
+    const preset = getItinerary(rawDestination);
+    if (preset) {
+      setItinerary(preset);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+      let isMounted = true;
+      fetchDynamicItinerary(rawDestination, daysParam, interestsParam).then(
+        (data) => {
+          if (isMounted) {
+            setItinerary(data);
+            setIsLoading(false);
+          }
+        }
+      );
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [rawDestination, daysParam, interestsParam]);
+
+  if (isLoading || !itinerary) {
+    return (
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-12 space-y-6">
+        <div className="flex items-center gap-2 text-primary-600 font-semibold text-sm">
+          <ArrowLeft className="w-4 h-4" />
+          <Link href="/planner" className="hover:underline">
+            Modify Trip Plan
+          </Link>
+        </div>
+        <div className="p-12 rounded-2xl border border-primary-200 bg-white flex flex-col items-center justify-center space-y-3 text-center shadow-xs">
+          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+          <div className="space-y-1">
+            <h2 className="font-display text-xl font-bold text-secondary-900">
+              Generating Custom Itinerary for {rawDestination}...
+            </h2>
+            <p className="text-xs text-secondary-600">
+              Consulting live cultural routes, transit schedules, and regional points of interest...
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-10 space-y-8">
@@ -41,7 +90,7 @@ function ItineraryContent() {
         </div>
       </div>
 
-      {/* Trip Metadata Bar (No pills/badges, clean info items) */}
+      {/* Trip Metadata Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl border border-primary-200 bg-white">
         <div className="flex items-center gap-3">
           <MapPin className="w-5 h-5 text-primary-600" />

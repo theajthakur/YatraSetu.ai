@@ -1,3 +1,5 @@
+import { DestinationItinerary } from "@/lib/mockItineraries";
+
 export interface PlaceInsight {
   summary: string;
   hospitality: string;
@@ -16,6 +18,7 @@ export interface TripSummary {
   overview: string;
   vibe: string;
   practical_tips: string;
+  nearby_recommendations?: string[];
 }
 
 export interface FetchTripSummaryParams {
@@ -38,11 +41,16 @@ export const FALLBACK_INSIGHTS: Record<string, PlaceInsight> = {
 
 export const FALLBACK_TRIP_SUMMARY: TripSummary = {
   overview:
-    "Expect an immersive cultural journey combining ancient architectural landmarks, sacred riverfront ghats, and vibrant local bazaars. Over your stay, you will experience the living heritage and spiritual essence of the region at a comfortable pace.",
+    "Expect an organic exploration across historical quarter monuments and local markets. Over your stay, you will experience living heritage and authentic regional flavors at a comfortable pace.",
   vibe:
-    "The atmosphere is deeply spiritual, historic, and bustling with local market energy.",
+    "Cultural, historic, and welcoming with bustling local market energy.",
   practical_tips:
-    "Carry comfortable walking footwear for heritage alleyways and wear lightweight cotton clothing suitable for daytime exploration.",
+    "Wear comfortable footwear for heritage walks and carry lightweight cotton clothing.",
+  nearby_recommendations: [
+    "Local Artisan Craft Market",
+    "Riverfront Promenade",
+    "Traditional Culinary Walk",
+  ],
 };
 
 export async function fetchPlaceInsights(
@@ -113,4 +121,82 @@ export async function fetchTripSummary(
     console.warn("Failed to fetch Gemini trip summary, using fallback:", error);
     return FALLBACK_TRIP_SUMMARY;
   }
+}
+
+export async function fetchDynamicItinerary(
+  destination: string,
+  days: string | number = 2,
+  interests: string = "Heritage, Culture"
+): Promise<DestinationItinerary> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "generate_full_itinerary",
+        destination,
+        days,
+        interests,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`);
+    }
+
+    const json = await response.json();
+    if (json.data && json.data.destination && json.data.days) {
+      return json.data as DestinationItinerary;
+    }
+
+    return createFallbackItinerary(destination, Number(days));
+  } catch (error) {
+    clearTimeout(timeoutId);
+    console.warn("Failed to fetch Gemini dynamic itinerary, using fallback:", error);
+    return createFallbackItinerary(destination, Number(days));
+  }
+}
+
+function createFallbackItinerary(
+  destination: string,
+  numDays: number = 2
+): DestinationItinerary {
+  return {
+    destination,
+    tagline: `Cultural Exploration & Heritage Discoveries in ${destination}`,
+    days: Array.from({ length: Math.max(1, Math.min(numDays, 5)) }).map(
+      (_, i) => ({
+        dayNumber: i + 1,
+        title: `Day ${i + 1}: ${destination} Heritage & Cultural Exploration`,
+        stops: [
+          {
+            id: `${destination.toLowerCase()}-${i + 1}-1`,
+            name: `${destination} Central Heritage Square`,
+            timeSlot: "09:00 AM - 11:30 AM",
+            description: `Explore historic architectural monuments and central heritage walkways of ${destination}.`,
+            crowdLevel: "Moderate crowd",
+            crowdStatus: "moderate",
+            category: "Heritage",
+          },
+          {
+            id: `${destination.toLowerCase()}-${i + 1}-2`,
+            name: `${destination} Local Culinary & Artisan Quarter`,
+            timeSlot: "01:30 PM - 04:00 PM",
+            description: `Sample regional food specialties and discover local handicrafts in ${destination}.`,
+            crowdLevel: "Low crowd",
+            crowdStatus: "low",
+            category: "Food",
+          },
+        ],
+      })
+    ),
+  };
 }

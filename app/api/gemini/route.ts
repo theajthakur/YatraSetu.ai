@@ -48,26 +48,64 @@ export async function POST(request: Request) {
 
     let systemPrompt = "";
 
-    if (type === "trip_summary") {
-      systemPrompt = `You are YatraSetu AI, an expert travel advisor for India.
-Generate a structured JSON trip summary overview for a user visiting ${destination}.
-
-SERVER CONTEXT:
-- Date: ${formattedDate}
-- Time: ${formattedTime}
-
-TRIP PARAMETERS:
-- Destination: "${destination}"
-- Duration: ${days} days
-- Selected Interests: "${interests}"
-- Language Preference: "${language}"
+    if (type === "generate_full_itinerary") {
+      systemPrompt = `You are YatraSetu AI, an expert travel planner for India.
+Generate a structured JSON day-by-day itinerary for a traveler visiting "${destination}" for ${days} days with interests in "${interests}".
 
 OUTPUT FORMAT REQUIREMENT:
 Respond ONLY with a valid JSON object matching this exact schema (no markdown, no backticks):
 {
-  "overview": "3-4 sentence plain-language overview describing what kind of trip experience to expect for a ${days}-day visit to ${destination} focusing on ${interests}.",
-  "vibe": "1-2 sentence description of the general vibe and atmosphere of the destination.",
-  "practical_tips": "1-2 practical travel tips based on trip length (${days} days) and current season (${formattedDate})."
+  "destination": "${destination}",
+  "tagline": "1-line catchy tagline for ${destination}",
+  "days": [
+    {
+      "dayNumber": 1,
+      "title": "Short title for Day 1 theme",
+      "stops": [
+        {
+          "id": "d1-s1",
+          "name": "Real monument/place name in ${destination}",
+          "timeSlot": "09:00 AM - 11:30 AM",
+          "description": "1-sentence plain language description of what to see or do.",
+          "crowdLevel": "Low crowd",
+          "crowdStatus": "low",
+          "category": "Heritage"
+        },
+        {
+          "id": "d1-s2",
+          "name": "Real food/cultural stop in ${destination}",
+          "timeSlot": "01:30 PM - 04:00 PM",
+          "description": "1-sentence description.",
+          "crowdLevel": "Moderate crowd",
+          "crowdStatus": "moderate",
+          "category": "Food"
+        }
+      ]
+    }
+  ]
+}`;
+    } else if (type === "trip_summary") {
+      const isHindi = language.toLowerCase().includes("hindi");
+
+      systemPrompt = `You are YatraSetu AI, an empathetic Indian travel advisor.
+Generate a highly specific, relatable 3-4 sentence trip summary for a traveler visiting ${destination}.
+
+TRIP PARAMETERS:
+- Destination: "${destination}" (Name ${destination} directly in the summary!)
+- Duration: ${days} days (Tailor pacing language specifically for a ${days}-day visit: e.g. express vs relaxed pace)
+- Traveler Interests: "${interests}" (Directly focus content on ${interests}; e.g. if Heritage/Spiritual, emphasize sacred temples/monuments, not generic tourism)
+- Current Date/Season: ${formattedDate}
+- Response Language: ${isHindi ? "HINDI (Write all output values fully in authentic Hindi text)" : "ENGLISH"}
+
+OUTPUT FORMAT REQUIREMENT:
+Respond ONLY with a valid JSON object matching this exact schema (no markdown, no backticks):
+{
+  "overview": "3-4 sentence relatable, non-generic summary naming ${destination}, explicitly tailored to a ${days}-day trip focusing on ${interests}.",
+  "vibe": "1-2 sentence description of the general vibe and atmosphere of ${destination}.",
+  "practical_tips": "1-2 practical tips based on ${days} days duration and season (${formattedDate}).",
+  "nearby_recommendations": [
+    "3 short specific nearby places or activities in/around ${destination}"
+  ]
 }`;
     } else {
       systemPrompt = `You are YatraSetu AI, an expert heritage and travel advisor for India.
