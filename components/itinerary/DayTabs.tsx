@@ -28,7 +28,7 @@ export default function DayTabs({ days, onViewHeritageInfo }: DayTabsProps) {
   return (
     <div className="space-y-6">
       {/* Day Selector Tabs */}
-      <div className="flex items-center gap-2 border-b border-primary-200 pb-3 overflow-x-auto">
+      <div className="flex items-center gap-3 border-b border-primary-200 pb-4 overflow-x-auto">
         {days.map((d) => {
           const isActive = d.dayNumber === activeDay;
           return (
@@ -36,7 +36,7 @@ export default function DayTabs({ days, onViewHeritageInfo }: DayTabsProps) {
               key={d.dayNumber}
               type="button"
               onClick={() => handleDaySelect(d.dayNumber)}
-              className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-6 py-3 rounded-xl text-base sm:text-lg font-bold transition-all whitespace-nowrap cursor-pointer ${
                 isActive
                   ? "bg-primary-600 text-white shadow-sm"
                   : "bg-white text-secondary-700 border border-primary-200 hover:bg-primary-100/60"
@@ -50,8 +50,8 @@ export default function DayTabs({ days, onViewHeritageInfo }: DayTabsProps) {
 
       {/* Day Header Title */}
       {currentDayData && (
-        <div className="space-y-1">
-          <h2 className="font-display text-xl font-bold text-secondary-900">
+        <div className="space-y-1 pt-2">
+          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-secondary-900">
             Day {currentDayData.dayNumber}: {currentDayData.title}
           </h2>
         </div>
@@ -59,15 +59,15 @@ export default function DayTabs({ days, onViewHeritageInfo }: DayTabsProps) {
 
       {/* Stop Cards Grid or Day Switching Loader */}
       {isSwitchingDay ? (
-        <div className="p-12 rounded-xl border border-primary-200/60 bg-white flex flex-col items-center justify-center space-y-2 text-center">
-          <Loader2 className="w-6 h-6 text-primary-600 animate-spin" />
-          <span className="text-xs font-semibold text-secondary-700">
+        <div className="p-12 rounded-2xl border border-primary-200/60 bg-white flex flex-col items-center justify-center space-y-3 text-center">
+          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+          <span className="text-sm sm:text-base font-semibold text-secondary-700">
             Fetching Day {activeDay} Route & Transit Crowd Updates...
           </span>
         </div>
       ) : (
         currentDayData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {currentDayData.stops.map((stop) => (
               <StopCard
                 key={stop.id}

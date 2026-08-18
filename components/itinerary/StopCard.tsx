@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Clock, Info, Compass, ChevronDown, ChevronUp, Heart, Users } from "lucide-react";
 import Card from "@/components/common/Card";
 import { ItineraryStop } from "@/lib/mockItineraries";
-import { fetchPlaceInsights, PlaceInsight } from "@/app/api/gemini/gemini";
+import { fetchPlaceInsights, PlaceInsight } from "@/lib/ai";
 
 interface StopCardProps {
   stop: ItineraryStop;
@@ -59,33 +59,33 @@ export default function StopCard({ stop, onViewHeritageInfo }: StopCardProps) {
   };
 
   return (
-    <Card className="flex flex-col justify-between space-y-4 w-full">
-      <div className="space-y-3">
+    <Card className="flex flex-col justify-between space-y-5 w-full p-5 sm:p-6">
+      <div className="space-y-4">
         {/* Top Info Bar */}
-        <div className="flex items-center justify-between gap-2 text-xs font-medium text-secondary-600">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-primary-600" />
+        <div className="flex items-center justify-between gap-2 text-sm sm:text-base font-semibold text-secondary-700">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary-600 shrink-0" />
             <span>{stop.timeSlot}</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <span
-              className={`w-2 h-2 rounded-full ${getCrowdDotColor(
+              className={`w-2.5 h-2.5 rounded-full ${getCrowdDotColor(
                 stop.crowdStatus
               )}`}
             />
-            <span className="text-secondary-700 font-medium">
+            <span className="text-secondary-800 font-bold">
               {stop.crowdLevel}
             </span>
           </div>
         </div>
 
         {/* Stop Heading & Description */}
-        <div className="space-y-1">
-          <h3 className="font-display text-lg font-bold text-secondary-900 leading-snug">
+        <div className="space-y-2">
+          <h3 className="font-display text-xl sm:text-2xl font-bold text-secondary-900 leading-snug">
             {stop.name}
           </h3>
-          <p className="text-xs sm:text-sm text-secondary-700 leading-relaxed">
+          <p className="text-sm sm:text-base text-secondary-700 leading-relaxed font-normal">
             {stop.description}
           </p>
         </div>
@@ -95,43 +95,43 @@ export default function StopCard({ stop, onViewHeritageInfo }: StopCardProps) {
           <button
             type="button"
             onClick={handleToggleInsight}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-700 hover:text-primary-900 transition-colors py-1 cursor-pointer"
+            className="inline-flex items-center gap-2 text-sm font-bold text-primary-700 hover:text-primary-900 transition-colors py-1 cursor-pointer"
           >
-            <Compass className="w-3.5 h-3.5 text-primary-600" />
+            <Compass className="w-4.5 h-4.5 text-primary-600" />
             <span>{isExpanded ? "Hide AI Insight" : "View AI Insight"}</span>
             {isExpanded ? (
-              <ChevronUp className="w-3.5 h-3.5" />
+              <ChevronUp className="w-4 h-4" />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5" />
+              <ChevronDown className="w-4 h-4" />
             )}
           </button>
 
           {/* Expandable Panel */}
           {isExpanded && (
-            <div className="mt-2 space-y-2">
+            <div className="mt-3 space-y-2">
               {loading ? (
                 <InsightSkeleton />
               ) : error ? (
-                <div className="p-3 rounded-lg bg-primary-100/30 border border-primary-200/60 text-xs text-secondary-600">
+                <div className="p-4 rounded-xl bg-primary-100/30 border border-primary-200/60 text-sm text-secondary-600 font-medium">
                   Insight unavailable
                 </div>
               ) : insight ? (
-                <div className="p-3.5 rounded-lg bg-primary-100/40 border border-primary-200/80 space-y-2 text-xs">
+                <div className="p-4 rounded-xl bg-primary-100/40 border border-primary-200/80 space-y-3 text-sm sm:text-base">
                   {/* Summary */}
-                  <p className="text-secondary-800 leading-relaxed">
+                  <p className="text-secondary-800 leading-relaxed font-medium">
                     {insight.summary}
                   </p>
 
                   {/* Hospitality & Safety */}
-                  <div className="flex items-start gap-1.5 text-secondary-700 border-t border-primary-200/60 pt-2">
-                    <Heart className="w-3.5 h-3.5 text-primary-600 mt-0.5 shrink-0" />
-                    <span className="leading-snug">{insight.hospitality}</span>
+                  <div className="flex items-start gap-2 text-secondary-700 border-t border-primary-200/60 pt-2.5">
+                    <Heart className="w-4 h-4 text-primary-600 mt-1 shrink-0" />
+                    <span className="leading-relaxed">{insight.hospitality}</span>
                   </div>
 
                   {/* Crowd Suggestion */}
-                  <div className="flex items-center gap-1.5 text-secondary-900 font-semibold border-t border-primary-200/60 pt-2">
-                    <Users className="w-3.5 h-3.5 text-primary-600 shrink-0" />
-                    <span className="text-[11px]">
+                  <div className="flex items-center gap-2 text-secondary-900 font-bold border-t border-primary-200/60 pt-2.5">
+                    <Users className="w-4 h-4 text-primary-600 shrink-0" />
+                    <span className="text-xs sm:text-sm font-semibold">
                       {insight.crowd_suggestion}
                     </span>
                   </div>
@@ -143,17 +143,17 @@ export default function StopCard({ stop, onViewHeritageInfo }: StopCardProps) {
       </div>
 
       {/* Card Footer Actions */}
-      <div className="pt-3 border-t border-primary-100 flex items-center justify-between">
-        <span className="text-xs font-medium text-primary-700">
+      <div className="pt-4 border-t border-primary-100 flex items-center justify-between">
+        <span className="text-sm font-bold text-primary-700">
           {stop.category}
         </span>
 
         <button
           type="button"
           onClick={() => onViewHeritageInfo?.(stop.name)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-800 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-primary-600 hover:text-primary-800 transition-colors cursor-pointer"
         >
-          <Info className="w-3.5 h-3.5" />
+          <Info className="w-4 h-4" />
           <span>View heritage info</span>
         </button>
       </div>

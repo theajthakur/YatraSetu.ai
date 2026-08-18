@@ -42,17 +42,17 @@
 - `components/planner/DurationStepper.tsx`: Days counter stepper.
 - `components/planner/InterestsSelect.tsx`: Checkboxes with Lucide scanability icons (Heritage, Food, Adventure, Spiritual).
 - `components/planner/LanguageToggle.tsx`: English / Hindi toggle segment.
-- `app/api/gemini/route.ts`: Server-side POST API route handler invoking Gemini API with server timestamp/date context for place insights (summary, hospitality, crowd_suggestion).
-- `app/api/gemini/gemini.ts`: Client-side helper module with PlaceInsight interface, AbortController timeout handling, and fallback insights.
+- `lib/ai.ts`: Central AI helper module reading `BASE_URL_BACKEND` (`http://localhost:8000`) from `.env` to connect directly to the Python backend endpoint `POST ${BASE_URL_BACKEND}/gemini/generate`.
+- `app/api/gemini/gemini.ts`: Re-exports `@/lib/ai` for backwards compatibility. All Gemini API calls across the app are strictly click-gated (zero useEffect auto-fetches on mount).
 - `components/safety/SOSButton.tsx`: Persistent safety SOS button with 1-second mock dispatch loader before displaying the calm "Alert Sent" confirmation Dialog.
 - `components/planner/PlannerForm.tsx`: Unified single-screen trip planner card with 1-second mock generation loader upon form submission.
 - `components/itinerary/TripSummaryCard.tsx`: Button-triggered trip summary component ("Get Trip Summary" CTA, zero auto-fetch on mount) rendering personalized overview, atmosphere, practical advice, and nearby recommendations.
-- `components/itinerary/StopCard.tsx`: Individual stop item card displaying time slot, place name, 1-line description, crowd level indicator, and expandable AI Insight panel.
-- `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal integrating live Gemini place insights, audio guide buffering simulation, and language switcher.
+- `components/itinerary/StopCard.tsx`: Individual stop item card displaying time slot, place name, 1-line description, crowd level indicator, and click-triggered expandable AI Insight panel.
+- `components/itinerary/HeritageModal.tsx`: Comprehensive QR/Heritage info modal with click-triggered live Gemini place insights, audio guide buffering simulation, and language switcher.
 
 ---
 
 ## Routes
 - `/`: Landing page + Hero section.
 - `/planner`: Single-screen Trip Planner form.
-- `/itinerary`: Itinerary results screen (supports preset & dynamic AI itineraries).
+- `/itinerary`: Itinerary results screen.

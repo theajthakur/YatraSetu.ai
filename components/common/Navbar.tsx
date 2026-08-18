@@ -4,7 +4,7 @@ import { Compass } from "lucide-react";
 export default function Navbar() {
   return (
     <header className="w-full border-b border-primary-200/60 bg-background/90 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <div className="p-2 rounded-lg bg-primary-100 text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-colors duration-200">
             <Compass className="w-6 h-6 stroke-[2]" />

@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  PlaceInsight,
-  TripSummary,
-  FALLBACK_INSIGHTS,
-  FALLBACK_TRIP_SUMMARY,
-} from "./gemini";
+
+const GEMINI_MODEL = "gemini-3.6-flash";
 
 export async function POST(request: Request) {
   try {
@@ -23,15 +19,14 @@ export async function POST(request: Request) {
 
     if (!apiKey) {
       console.warn("GEMINI_API_KEY is not defined in environment.");
-      const fallback =
-        type === "trip_summary"
-          ? FALLBACK_TRIP_SUMMARY
-          : FALLBACK_INSIGHTS.default;
-      return NextResponse.json({
-        success: false,
-        data: fallback,
-        error: "Missing API Key",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          error: "Missing GEMINI_API_KEY in environment configuration",
+        },
+        { status: 500 }
+      );
     }
 
     const serverNow = new Date();
@@ -87,24 +82,34 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
     } else if (type === "trip_summary") {
       const isHindi = language.toLowerCase().includes("hindi");
 
-      systemPrompt = `You are YatraSetu AI, an empathetic Indian travel advisor.
-Generate a highly specific, relatable 3-4 sentence trip summary for a traveler visiting ${destination}.
+      systemPrompt = `You are YatraSetu AI, an empathetic Indian cultural travel advisor.
+Generate a highly specific, personalized, 3-4 sentence trip overview for a user visiting "${destination}".
 
-TRIP PARAMETERS:
-- Destination: "${destination}" (Name ${destination} directly in the summary!)
-- Duration: ${days} days (Tailor pacing language specifically for a ${days}-day visit: e.g. express vs relaxed pace)
-- Traveler Interests: "${interests}" (Directly focus content on ${interests}; e.g. if Heritage/Spiritual, emphasize sacred temples/monuments, not generic tourism)
-- Current Date/Season: ${formattedDate}
-- Response Language: ${isHindi ? "HINDI (Write all output values fully in authentic Hindi text)" : "ENGLISH"}
+MANDATORY REAL-WORLD SPECIFICITY INSTRUCTIONS FOR "${destination}":
+1. ALWAYS NAME SPECIFIC REAL LANDMARKS AND AT LEAST ONE LOCALLY FAMOUS FOOD OR CRAFT ITEM FOR "${destination}". DO NOT USE VAGUE GENERIC PHRASES WITHOUT A CONCRETE EXAMPLE ATTACHED.
+   - Name 2-3 actual well-known landmarks/monuments specific to "${destination}" (e.g., if Agra: Taj Mahal, Agra Fort, Fatehpur Sikri; if Varanasi: Kashi Vishwanath, Dashashwamedh Ghat, Sarnath; if Jaipur: Amer Fort, Hawa Mahal; if Delhi: Red Fort, Qutub Minar).
+   - Mention at least one locally famous food/craft/tradition specific to "${destination}" (e.g., Petha/Bedai for Agra, Banarasi silk/Malaiyyo for Varanasi, Ghevar/Dal Baati for Jaipur).
+2. TAILOR TONE & FOCUS TO SELECTED INTERESTS ("${interests}"):
+   - If "Heritage" is selected, focus heavily on dynastic history, royal architecture, and ancient stone monuments.
+   - If "Spiritual" is selected, focus heavily on sacred chants, holy riverfronts, and temple corridor rituals.
+   - If "Food" is selected, focus on street food trails, ancient halwai sweet shops, and local culinary specialties.
+   - If "Adventure" is selected, focus on hill fort treks, river cruises, and outdoor exploration.
+3. REFLECT PACING FOR A ${days}-DAY VISIT:
+   - A short ${days}-day trip must highlight a realistic, non-overwhelming itinerary pace (e.g. focusing on core highlights).
+   - A longer trip should mention an easy, relaxed pace allowing off-beat explorations.
+4. AVOID GENERIC FILLER:
+   - Never use empty phrases like "rich cultural heritage", "vibrant atmosphere", or "popular tourist spots" unless immediately accompanied by a real named landmark or dish.
+5. LANGUAGE:
+   - ${isHindi ? "Write ALL JSON values fully in authentic Hindi (हिंदी) text." : "Write in clear, engaging English."}
 
 OUTPUT FORMAT REQUIREMENT:
 Respond ONLY with a valid JSON object matching this exact schema (no markdown, no backticks):
 {
-  "overview": "3-4 sentence relatable, non-generic summary naming ${destination}, explicitly tailored to a ${days}-day trip focusing on ${interests}.",
-  "vibe": "1-2 sentence description of the general vibe and atmosphere of ${destination}.",
-  "practical_tips": "1-2 practical tips based on ${days} days duration and season (${formattedDate}).",
+  "overview": "3-4 sentence specific, personalized overview naming 2-3 real landmarks (e.g., Taj Mahal, Agra Fort) and local food/craft items (e.g., Petha), tailored to ${days} days and ${interests}.",
+  "vibe": "1-2 sentence description of the authentic atmosphere of ${destination} with concrete local examples.",
+  "practical_tips": "1-2 practical tips based on trip duration (${days} days) and current date/season (${formattedDate}).",
   "nearby_recommendations": [
-    "3 short specific nearby places or activities in/around ${destination}"
+    "3 real specific nearby attractions, heritage spots, or food bazaars in/around ${destination}"
   ]
 }`;
     } else {
@@ -131,7 +136,7 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
 }`;
     }
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
     const response = await fetch(geminiUrl, {
       method: "POST",
@@ -154,15 +159,14 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
     if (!response.ok) {
       const errText = await response.text();
       console.error("Gemini API HTTP Error:", response.status, errText);
-      const fallback =
-        type === "trip_summary"
-          ? FALLBACK_TRIP_SUMMARY
-          : FALLBACK_INSIGHTS.default;
-      return NextResponse.json({
-        success: false,
-        data: fallback,
-        error: `Gemini HTTP ${response.status}`,
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          error: `Gemini API Error ${response.status}: ${errText}`,
+        },
+        { status: response.status }
+      );
     }
 
     const jsonResult = await response.json();
@@ -170,15 +174,14 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
       jsonResult?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!responseText) {
-      const fallback =
-        type === "trip_summary"
-          ? FALLBACK_TRIP_SUMMARY
-          : FALLBACK_INSIGHTS.default;
-      return NextResponse.json({
-        success: false,
-        data: fallback,
-        error: "Empty response from Gemini API",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          error: "Empty response from Gemini API",
+        },
+        { status: 502 }
+      );
     }
 
     let parsedData: any;
@@ -190,10 +193,14 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
       parsedData = JSON.parse(cleanedText);
     } catch (parseError) {
       console.warn("Failed to parse Gemini JSON output:", responseText);
-      parsedData =
-        type === "trip_summary"
-          ? FALLBACK_TRIP_SUMMARY
-          : FALLBACK_INSIGHTS.default;
+      return NextResponse.json(
+        {
+          success: false,
+          data: null,
+          error: "Invalid JSON response format from Gemini API",
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -202,10 +209,13 @@ Respond ONLY with a valid JSON object matching this exact schema (no markdown, n
     });
   } catch (error: any) {
     console.error("Error in Gemini API route handler:", error);
-    return NextResponse.json({
-      success: false,
-      data: FALLBACK_TRIP_SUMMARY,
-      error: error.message || "Internal Server Error",
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        data: null,
+        error: error.message || "Internal Server Error",
+      },
+      { status: 500 }
+    );
   }
 }

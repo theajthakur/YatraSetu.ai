@@ -4,7 +4,7 @@ import { Compass } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="w-full border-t border-primary-200/60 bg-primary-100/40 py-12 mt-auto">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-md bg-primary-600 text-white">
             <Compass className="w-5 h-5 stroke-[2]" />
